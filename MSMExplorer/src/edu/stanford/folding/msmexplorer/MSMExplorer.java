@@ -189,6 +189,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 	private boolean autoRange = true; //whether to set axis ranges automatically
 
 	private PDBServer pdbServer = null;
+	private final SelfRefEdgeRenderer m_er = new SelfRefEdgeRenderer();
 
 	/**
 	 * Initial program constructor; creates the initial splash screen
@@ -292,7 +293,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		final ImageToggleLabelRenderer tr = new ImageToggleLabelRenderer();
 		tr.setVerticalAlignment(Constants.CENTER);
 		tr.setRoundedCorner(8, 8);
-		m_vis.setRendererFactory(new DefaultRendererFactory(tr, new SelfRefEdgeRenderer()));
+		m_vis.setRendererFactory(new DefaultRendererFactory(tr, m_er));
 
 		final ShapeRenderer sr = new ShapeRenderer();
 
@@ -887,7 +888,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					((DefaultRendererFactory) m_vis.getRendererFactory()).add(
 						new OrPredicate(new InGroupPredicate("xlabels"),
 							new InGroupPredicate("ylabels")),
-						new AxisRotateRenderer(Constants.LEFT, Constants.FAR_BOTTOM));
+						new AxisRotateRenderer(Constants.FAR_LEFT, Constants.FAR_BOTTOM));
 					
 					Rectangle2D bounds = display.getItemBounds();
 					AxisLayout xaxis = new AxisLayout(NODES, (String)xAxisSelector.getSelectedItem(), Constants.X_AXIS, VisiblePredicate.TRUE);
@@ -910,7 +911,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 						}
 					}
 					
-					Rectangle2D ybounds = new Rectangle2D.Double(bounds.getX() - 10, bounds.getY(), bounds.getWidth() + 10, bounds.getHeight());
+					Rectangle2D ybounds = new Rectangle2D.Double(bounds.getX() - 10, bounds.getY(), 10, bounds.getHeight());
 					AxisLabelLabelLayout ylabels = new AxisLabelLabelLayout("ylabels", yaxis, ybounds);
 					ylabels.setLabel(yAxisLabel);
 					ylabels.setSpacing(ySpacing.getValue());
@@ -1249,6 +1250,20 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 
+		final JMenuItem saveNodeTable = new JMenuItem("Save Node Table");
+		saveNodeTable.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				MSMIOLib.saveCSV(g.getNodeTable());
+			}
+		});
+
+		final JMenuItem saveEdgeTable = new JMenuItem("Save Edge Table");
+		saveEdgeTable.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				MSMIOLib.saveCSV(g.getEdgeTable());
+			}
+		});
+
 		// The following block is the gui boilerplate for a
 		// currently unimplemented automated PDB concatenation function
 		JMenuItem makeMovie = new JMenuItem("Create PDB Movie");
@@ -1300,6 +1315,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		dataMenu.addSeparator();
 		dataMenu.add(openNodeTable);
 		dataMenu.add(openEdgeTable);
+		dataMenu.addSeparator();
+		dataMenu.add(saveNodeTable);
+		dataMenu.add(saveEdgeTable);
 		//dataMenu.add(makeMovie); XXX put this back when implemented...
 
 		JMenuBar menubar = new JMenuBar();
@@ -1774,8 +1792,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 
 		public void actionPerformed(ActionEvent e) {
 			MSMIOLib.saveGML(m_view, graph);
-
 		}
 	}
+
 } // end of class MSMExplorer
 
